@@ -48,6 +48,9 @@ void AIslandGenerator::GenerateTerrain()
 											, Tangents, true);
 		}
 	}
+
+	UE_LOG(LogTemp, Display, TEXT("지형 생성 완료: %s")
+			, *FDateTime::Now().ToString());
 }
 
 void AIslandGenerator::CalculateTerrainData_Internal(TArray<FVector>& Vertices
@@ -67,8 +70,8 @@ void AIslandGenerator::CalculateTerrainData_Internal(TArray<FVector>& Vertices
 			const uint16 YPos = CellSize * YIndex;
 
 			// 섹션 내의 상대 좌표가 아닌 절대 좌표로 계산할 것
-			const float RandomHeightValue = FNoiseUtil::FbmPerlinNoise2D(
-				FVector2D(XPos, YPos), Seed, FNoiseUtil::PerlinNoise2D);
+			const float RandomHeightValue = FNoiseUtil::DomainWarpWithFbm(
+				FVector2D(XPos, YPos), Seed, FNoiseUtil::FbmPerlinNoise2D);
 
 			const FVector VertexPos = FVector(XPos, YPos
 											, RandomHeightValue * MaxHeight);
