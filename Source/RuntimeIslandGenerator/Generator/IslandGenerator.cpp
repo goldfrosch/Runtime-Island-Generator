@@ -1,9 +1,8 @@
 ﻿#include "IslandGenerator.h"
 
-#include "Util/NoiseUtil.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "ProceduralMeshComponent/Public/KismetProceduralMeshLibrary.h"
 #include "ProceduralMeshComponent/Public/ProceduralMeshComponent.h"
+#include "Util/GenerateUtil.h"
 
 AIslandGenerator::AIslandGenerator()
 {
@@ -69,25 +68,21 @@ void AIslandGenerator::CalculateTerrainData_Internal(TArray<FVector>& Vertices
 			const uint16 XPos = CellSize * XIndex;
 			const uint16 YPos = CellSize * YIndex;
 
-			// 섹션 내의 상대 좌표가 아닌 절대 좌표로 계산할 것
-			const float RandomHeightValue = FNoiseUtil::DomainWarpWithFbm(
-				FVector2D(XPos, YPos), Seed, FNoiseUtil::FbmPerlinNoise2D);
+			const FVector VertexPos = FVector(XPos, YPos, 0);
 
-			const FVector VertexPos = FVector(XPos, YPos
-											, RandomHeightValue * MaxHeight);
 			Vertices.Add(VertexPos);
 
 			// UV 값 추가
 			UV0s.Add(FVector2d(XIndex, YIndex));
-
-			if (IsDebugMode)
-			{
-				UKismetSystemLibrary::DrawDebugSphere(
-					GetWorld(), VertexPos, 2.4, 12, FLinearColor::Green, 5.f
-					, 0);
-			}
 		}
 	}
+
+	const float HeightScale = 0.35f * VertexCount * CellSize;
+	FGenerateUtil::DiamondSquare(Vertices, VertexCount, {
+									VertexCount, Seed, 0.4f * HeightScale, 0.56
+									, HeightScale
+									, FVector2D(XTileIndex, YTileIndex)
+								});
 }
 
 void AIslandGenerator::CalculateTriangle_Internal(TArray<int32>& CalcTriangles

@@ -27,10 +27,6 @@ protected:
 
 	UPROPERTY(EditInstanceOnly, Category = "Options|Terrain"
 		, meta = (AllowPrivateAccess = true))
-	bool IsDebugMode = true;
-
-	UPROPERTY(EditInstanceOnly, Category = "Options|Terrain"
-		, meta = (AllowPrivateAccess = true))
 	int32 Seed = 0;
 
 	UPROPERTY(EditInstanceOnly, Category = "Options|Terrain|Base"
@@ -48,10 +44,6 @@ protected:
 	UPROPERTY(EditInstanceOnly, Category = "Options|Terrain|Base"
 		, meta = (AllowPrivateAccess = true, ClampMin = "0.01"))
 	float CellSize = 8.f;
-
-	UPROPERTY(EditInstanceOnly, Category = "Options|Terrain|Base"
-		, meta = (AllowPrivateAccess = true, ClampMin = "0"))
-	float MaxHeight = 100.f;
 
 	void CalculateTerrainData_Internal(TArray<FVector>& Vertices
 										, TArray<FVector2d>& UV0s
