@@ -4,8 +4,12 @@ struct FGeneratedDiamondSquareTileParams
 {
 	uint32 VertexCount;
 	int64 Seed;
-
 	FVector2D TileIndex;
+
+	float CellSize = 0.f;
+	float BaseDisp = 0.4f;
+	float Roughness = 0.56f;
+	float HeightScale = 0.35f;
 };
 
 struct FGeneratedSquareStepParams
@@ -14,6 +18,7 @@ struct FGeneratedSquareStepParams
 	uint32 Size;
 	int64 Seed;
 	FVector2D CurrentPos;
+	float Disp = 1.f;
 };
 
 struct FGeneratedDiamondStepParams
@@ -22,6 +27,7 @@ struct FGeneratedDiamondStepParams
 	uint32 Size;
 	int64 Seed;
 	FVector2D CurrentPos;
+	float Disp = 1.f;
 };
 
 class FGenerateUtil
