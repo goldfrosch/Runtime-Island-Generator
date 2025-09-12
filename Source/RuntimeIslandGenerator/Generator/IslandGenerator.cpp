@@ -3,6 +3,7 @@
 #include "ProceduralMeshComponent/Public/KismetProceduralMeshLibrary.h"
 #include "ProceduralMeshComponent/Public/ProceduralMeshComponent.h"
 #include "Util/GenerateUtil.h"
+#include "Util/NoiseUtil.h"
 
 AIslandGenerator::AIslandGenerator()
 {
@@ -61,14 +62,14 @@ void AIslandGenerator::CalculateTerrainData_Internal(TArray<FVector>& Vertices
 		for (int32 x = -1; x <= VertexCount; x++)
 		{
 			// 타일 섹션 위치에 따른 X, Y Index 값
-			const uint16 XIndex = (VertexCount - 1) * XTileIndex + x;
-			const uint16 YIndex = (VertexCount - 1) * YTileIndex + y;
+			const int32 XIndex = (VertexCount - 1) * XTileIndex + x;
+			const int32 YIndex = (VertexCount - 1) * YTileIndex + y;
 
 			// Vertices에 넣을 포지션 정보 먼저 구함
-			const uint16 XPos = CellSize * XIndex;
-			const uint16 YPos = CellSize * YIndex;
+			const int32 XPos = CellSize * XIndex;
+			const int32 YPos = CellSize * YIndex;
 
-			const FVector VertexPos = FVector(XPos, YPos, 0);
+			const FVector VertexPos = FVector(XPos, YPos, 10);
 
 			Vertices.Add(VertexPos);
 
@@ -77,10 +78,8 @@ void AIslandGenerator::CalculateTerrainData_Internal(TArray<FVector>& Vertices
 		}
 	}
 
-	const float HeightScale = 0.35f * VertexCount * CellSize;
 	FGenerateUtil::DiamondSquare(Vertices, VertexCount, {
-									VertexCount, Seed, 0.4f * HeightScale, 0.56
-									, HeightScale
+									VertexCount, Seed
 									, FVector2D(XTileIndex, YTileIndex)
 								});
 }
@@ -166,7 +165,6 @@ void AIslandGenerator::FilterTerrainData_Internal(TArray<FVector>& Vertices
 				Normals.Add(TempNormals[Index]);
 				Tangents.Emplace(TempTangents[Index]);
 			}
-
 			Index += 1;
 		}
 	}

@@ -16,5 +16,5 @@ void FRuntimeIslandGeneratorModule::ShutdownModule()
 }
 
 #undef LOCTEXT_NAMESPACE
-	
-IMPLEMENT_MODULE(FRuntimeIslandGeneratorModule, RuntimeIslandGeneratorModule)
+
+IMPLEMENT_MODULE(FRuntimeIslandGeneratorModule, FRuntimeIslandGeneratorModule)
