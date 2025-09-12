@@ -3,7 +3,6 @@
 #include "ProceduralMeshComponent/Public/KismetProceduralMeshLibrary.h"
 #include "ProceduralMeshComponent/Public/ProceduralMeshComponent.h"
 #include "Util/GenerateUtil.h"
-#include "Util/NoiseUtil.h"
 
 AIslandGenerator::AIslandGenerator()
 {
@@ -69,7 +68,7 @@ void AIslandGenerator::CalculateTerrainData_Internal(TArray<FVector>& Vertices
 			const int32 XPos = CellSize * XIndex;
 			const int32 YPos = CellSize * YIndex;
 
-			const FVector VertexPos = FVector(XPos, YPos, 10);
+			const FVector VertexPos = FVector(XPos, YPos, FMath::RandRange(-64, 256));
 
 			Vertices.Add(VertexPos);
 

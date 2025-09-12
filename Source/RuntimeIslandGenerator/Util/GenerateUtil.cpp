@@ -95,12 +95,11 @@ void FGenerateUtil::SquareStep(TArray<FVector>& Vertices
 
 	if (Count > 0)
 	{
-		// Avg += static_cast<int>(FHashUtil::Hash01_2D(
-		// 	FVector2D(X, Y), Params.Seed) * 10) % (Size * 2) - Size;
+		Avg += static_cast<int>(FHashUtil::Hash01_2D(
+			FVector2D(X, Y), Params.Seed) * Size) % (Size * 2) - Size;
 		Avg = Avg / Count;
 
-		Vertices[GetIndexWithoutApron(FVector2D(X, Y), VertexCount)].Z =
-			round(Avg);
+		Vertices[GetIndexWithoutApron(FVector2D(X, Y), VertexCount)].Z = Avg;
 	}
 }
 
@@ -142,12 +141,11 @@ void FGenerateUtil::DiamondStep(TArray<FVector>& Vertices
 
 	if (Count > 0)
 	{
-		// Avg += static_cast<int>(FHashUtil::Hash01_2D(
-		// 	FVector2D(X, Y), Params.Seed) * 10) % (Size * 2) - Size;
+		Avg += static_cast<int>(FHashUtil::Hash01_2D(
+			FVector2D(X, Y), Params.Seed) * Size) % (Size * 2) - Size;
 		Avg = Avg / Count;
 
-		Vertices[GetIndexWithoutApron(FVector2D(X, Y), VertexCount)].Z =
-			round(Avg);
+		Vertices[GetIndexWithoutApron(FVector2D(X, Y), VertexCount)].Z = Avg;
 	}
 }
 
