@@ -4,7 +4,7 @@
 #include "ProceduralMeshComponent/Public/ProceduralMeshComponent.h"
 
 #include "Util/GenerateUtil.h"
-#include "Util/HashUtil.h"
+#include "Util/NoiseUtil.h"
 
 AIslandGenerator::AIslandGenerator()
 {
@@ -70,8 +70,11 @@ void AIslandGenerator::CalculateTerrainData_Internal(TArray<FVector>& Vertices
 			const int32 XPos = CellSize * XIndex;
 			const int32 YPos = CellSize * YIndex;
 
-			const FVector VertexPos = FVector(XPos, YPos
-											, FMath::RandRange(-160, 640));
+			const auto VertexPos = FVector(XPos, YPos
+											, FNoiseUtil::Height_Mountains(
+												FVector2D(XPos, YPos)
+												, FFractalParams()
+												, FWarpParams()) * VertexCount);
 
 			Vertices.Add(VertexPos);
 
@@ -159,24 +162,16 @@ void AIslandGenerator::FilterTerrainData_Internal(TArray<FVector>& Vertices
 	uint32 Index = 0;
 	for (int32 y = -1; y <= VertexCount; y++)
 	{
-		FString Temp;
 		for (int32 x = -1; x <= VertexCount; x++)
 		{
 			if (x >= 0 && y >= 0 && x < VertexCount && y < VertexCount)
 			{
-				Temp += FString::Printf(
-					TEXT("%d,"), static_cast<int>(TempVertices[Index].Z));
 				Vertices.Add(TempVertices[Index]);
 				UV0s.Add(TempUV0s[Index]);
 				Normals.Add(TempNormals[Index]);
 				Tangents.Emplace(TempTangents[Index]);
 			}
 			Index += 1;
-		}
-
-		if (y >= 0 && y < VertexCount)
-		{
-			UE_LOG(LogTemp, Display, TEXT("%s"), *Temp);
 		}
 	}
 }

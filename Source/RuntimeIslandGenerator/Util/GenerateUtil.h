@@ -7,9 +7,9 @@ struct FGeneratedDiamondSquareTileParams
 	FVector2D TileIndex;
 
 	float CellSize = 0.f;
-	float BaseDisp = 0.4f;
-	float Roughness = 0.56f;
-	float HeightScale = 0.35f;
+	float BaseDisp = 0.54f;
+	float Roughness = 0.37f;
+	float HeightScale = 0.64f;
 };
 
 struct FGeneratedSquareStepParams

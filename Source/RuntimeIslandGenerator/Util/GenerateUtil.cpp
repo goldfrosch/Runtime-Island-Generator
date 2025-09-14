@@ -6,14 +6,11 @@ void FGenerateUtil::DiamondSquare(TArray<FVector>& Vertices, const uint32 Size
 								, const FGeneratedDiamondSquareTileParams&
 								Params)
 {
-	const float HeightScaleMeters = (Params.VertexCount - 1) * Params.CellSize *
-		Params.HeightScale;
-	float BaseDispMeters = HeightScaleMeters * Params.BaseDisp;
-
-	BaseDispMeters *= FMath::Pow(Params.Roughness
-								, Size / Params.VertexCount - 1 < 0
-									? 0
-									: Size / Params.VertexCount - 1);
+	const uint32 VC = Params.VertexCount; // 2^k
+	const int WorldStride = VC - 1;
+	const float TileWorld = WorldStride * Params.CellSize;
+	const float HeightU = TileWorld * Params.HeightScale;
+	const float BaseAmp = HeightU * Params.BaseDisp;
 
 	const uint32 Half = Size / 2;
 	if (Half < 1)
@@ -21,44 +18,30 @@ void FGenerateUtil::DiamondSquare(TArray<FVector>& Vertices, const uint32 Size
 		return;
 	}
 
-	for (uint32 y = Half; y < Params.VertexCount; y += Size)
+	const float k = FMath::Log2(
+		static_cast<float>(VC) / static_cast<float>(Size));
+	const float DispAmp = BaseAmp * FMath::Pow(Params.Roughness, k);
+
+	for (uint32 y = Half; y < VC; y += Size)
 	{
-		for (uint32 x = Half; x < Params.VertexCount; x += Size)
+		for (uint32 x = Half; x < VC; x += Size)
 		{
 			SquareStep(Vertices, {
 							Params.VertexCount, Size, Params.Seed
-							, FVector2D(x, y), BaseDispMeters
+							, FVector2D(x, y), DispAmp
 						});
 		}
 	}
 
-	int Col = 0;
-	for (uint32 x = 0; x < Params.VertexCount; x += Half)
+	for (uint32 x = 0, col = 0; x < VC; x += Half, ++col)
 	{
-		Col++;
-		if (Col % 2 == 1)
+		const uint32 yStart = (col % 2 == 1) ? Half : 0;
+		for (uint32 y = yStart; y < VC; y += Size)
 		{
-			for (uint32 y = Half; y < Params.VertexCount; y += Size)
-			{
-				DiamondStep(Vertices, {
-								Params.VertexCount, Half, Params.Seed
-								, FVector2D(x % Params.VertexCount
-											, y % Params.VertexCount)
-								, BaseDispMeters
-							});
-			}
-		}
-		else
-		{
-			for (uint32 y = 0; y < Params.VertexCount; y += Size)
-			{
-				DiamondStep(Vertices, {
-								Params.VertexCount, Half, Params.Seed
-								, FVector2D(x % Params.VertexCount
-											, y % Params.VertexCount)
-								, BaseDispMeters
-							});
-			}
+			DiamondStep(Vertices, {
+							Params.VertexCount, Half, Params.Seed
+							, FVector2D(x % VC, y % VC), DispAmp
+						});
 		}
 	}
 
@@ -106,15 +89,11 @@ void FGenerateUtil::SquareStep(TArray<FVector>& Vertices
 
 	if (Count > 0)
 	{
-		Avg += static_cast<int>(FHashUtil::Hash01_2D(
-			FVector2D(X, Y), Params.Seed) * Size) % (Size * 2) - Size;
 		Avg = Avg / Count;
 	}
 
-	const float Disp = FHashUtil::RandDisp(FVector2D(X, Y), Size, Params.Disp
-											, Params.Seed);
-
-	Vertices[GetIndexWithoutApron(FVector2D(X, Y), VertexCount)].Z = Avg + Disp;
+	Vertices[GetIndexWithoutApron(FVector2D(X, Y), VertexCount)].Z = Avg +
+		FHashUtil::RandDisp(FVector2D(X, Y), Size, Params.Disp, Params.Seed);
 }
 
 void FGenerateUtil::DiamondStep(TArray<FVector>& Vertices
@@ -155,15 +134,11 @@ void FGenerateUtil::DiamondStep(TArray<FVector>& Vertices
 
 	if (Count > 0)
 	{
-		Avg += static_cast<int>(FHashUtil::Hash01_2D(
-			FVector2D(X, Y), Params.Seed) * Size) % (Size * 2) - Size;
 		Avg = Avg / Count;
 	}
 
-	const float Disp = FHashUtil::RandDisp(FVector2D(X, Y), Size, Params.Disp
-											, Params.Seed);
-
-	Vertices[GetIndexWithoutApron(FVector2D(X, Y), VertexCount)].Z = Avg + Disp;
+	Vertices[GetIndexWithoutApron(FVector2D(X, Y), VertexCount)].Z = Avg +
+		FHashUtil::RandDisp(FVector2D(X, Y), Size, Params.Disp, Params.Seed);
 }
 
 uint32 FGenerateUtil::GetIndexWithoutApron(const FVector2D& Pos

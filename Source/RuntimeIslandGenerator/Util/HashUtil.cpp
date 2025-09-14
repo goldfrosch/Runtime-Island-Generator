@@ -11,7 +11,27 @@ int64 FHashUtil::SplitMix(int64 Seed)
 	return Seed;
 }
 
-int64 FHashUtil::Hash32_2D(const FVector2D& Pos, const int64& Seed)
+int64 FHashUtil::WangHash(int64 X)
+{
+	X = X ^ 61u ^ X >> 16;
+	X *= 9u;
+	X *= 0x27d4eb2du;
+	X = X ^ X >> 4;
+	X = X ^ X >> 15;
+	return X;
+}
+
+float FHashUtil::Hash01(const int64 X)
+{
+	return (WangHash(X) & 0x00FFFFFF) / 16777216.0f;
+}
+
+float FHashUtil::Smooth5(const float T)
+{
+	return FMath::Pow(T, 3) * (T * (T * 6.f - 15.f) + 10.f);
+}
+
+int64 FHashUtil::Hash32_2D(const FVector2D& Pos, const int64 Seed)
 {
 	const int64 kx = static_cast<int64>(Pos.X) * 0x517cc1b727220a95ull;
 	const int64 ky = static_cast<int64>(Pos.Y) * 0x9e3779b97f4a7c15ull;
@@ -20,7 +40,7 @@ int64 FHashUtil::Hash32_2D(const FVector2D& Pos, const int64& Seed)
 	return SplitMix(kx ^ ky + 0x632be59bd9b4e019ull ^ ks);
 }
 
-float FHashUtil::Hash01_2D(const FVector2D& Pos, const int64& Seed)
+float FHashUtil::Hash01_2D(const FVector2D& Pos, const int64 Seed)
 {
 	const int32 Hash = Hash32_2D(Pos, Seed);
 
