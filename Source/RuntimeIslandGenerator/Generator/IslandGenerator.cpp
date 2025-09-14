@@ -72,7 +72,7 @@ void AIslandGenerator::CalculateTerrainData_Internal(TArray<FVector>& Vertices
 
 			const auto VertexPos = FVector(XPos, YPos
 											, FNoiseUtil::Height_Mountains(
-												FVector2D(XPos, YPos)
+												FVector2D(XPos, YPos) / 2.5f
 												, FFractalParams()
 												, FWarpParams()) * VertexCount);
 
