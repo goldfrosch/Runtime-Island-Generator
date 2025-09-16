@@ -34,6 +34,10 @@ protected:
 	uint16 VertexCount = 1;
 
 	UPROPERTY(EditInstanceOnly, Category = "Options|Terrain|Base"
+		, meta = (AllowPrivateAccess = true, ClampMin = "1"))
+	uint16 MaxHeight = 512;
+
+	UPROPERTY(EditInstanceOnly, Category = "Options|Terrain|Base"
 		, meta = (AllowPrivateAccess = true))
 	uint16 XTileSize = 4;
 

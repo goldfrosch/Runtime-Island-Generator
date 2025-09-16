@@ -70,11 +70,11 @@ void AIslandGenerator::CalculateTerrainData_Internal(TArray<FVector>& Vertices
 			const int32 XPos = CellSize * XIndex;
 			const int32 YPos = CellSize * YIndex;
 
-			const auto VertexPos = FVector(XPos, YPos
-											, FNoiseUtil::Height_Mountains(
-												FVector2D(XPos, YPos) / 2.5f
-												, FFractalParams()
-												, FWarpParams()) * VertexCount);
+			const float Height = FNoiseUtil::Height_Mountains(
+				FVector2D(XPos, YPos) * 0.006f, Seed, MountainBiomeFractal
+				, MountainBiomeWarp, FVector2D(1, 0));
+
+			const FVector VertexPos = FVector(XPos, YPos, Height * MaxHeight);
 
 			Vertices.Add(VertexPos);
 
