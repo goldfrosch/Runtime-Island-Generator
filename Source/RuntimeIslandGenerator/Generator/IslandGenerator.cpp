@@ -3,7 +3,6 @@
 #include "ProceduralMeshComponent/Public/KismetProceduralMeshLibrary.h"
 #include "ProceduralMeshComponent/Public/ProceduralMeshComponent.h"
 
-#include "Util/GenerateUtil.h"
 #include "Util/NoiseUtil.h"
 
 AIslandGenerator::AIslandGenerator()
