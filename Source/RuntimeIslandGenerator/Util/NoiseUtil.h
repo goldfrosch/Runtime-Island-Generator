@@ -15,7 +15,7 @@ struct FWarpParams
 	float Detail; // 고주파 워프 가중
 };
 
-constexpr FFractalParams MountainBiomeFractal{5, 2.f, 0.45f, 0.0008f};
+constexpr FFractalParams MountainBiomeFractal{7, 2.2f, 0.6f, 0.004f};
 constexpr FWarpParams MountainBiomeWarp{1200.f, 0.0008f, 0.5f};
 
 class FNoiseUtil
