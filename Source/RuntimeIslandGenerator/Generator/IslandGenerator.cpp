@@ -81,6 +81,12 @@ void AIslandGenerator::CalculateTerrainData_Internal(TArray<FVector>& Vertices
 			UV0s.Add(FVector2d(XIndex, YIndex));
 		}
 	}
+
+	FGenerateUtil::DiamondSquare(Vertices, VertexCount, {
+									VertexCount, Seed
+									, FVector2D(XTileIndex, YTileIndex)
+									, CellSize
+								});
 }
 
 void AIslandGenerator::CalculateTriangle_Internal(TArray<int32>& CalcTriangles
