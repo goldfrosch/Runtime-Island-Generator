@@ -23,7 +23,10 @@ class FNoiseUtil
 public:
 	static float Height_Mountains(const FVector2D& Pos, const int32 Seed
 								, const FFractalParams& Base
-								, const FWarpParams& W, FVector2D RidgeDir);
+								, const FWarpParams& W);
+
+	static void BlurNxN(TArray<FVector>& Positions, const uint32 VertexCount
+						, const uint8 N);
 
 private:
 	static float ValueNoise2D(const FVector2D& Pos, const int32 Seed);
@@ -31,6 +34,7 @@ private:
 								, const FFractalParams& Params);
 	static float RidgedMF(const FVector2D& Pos, const int32 Seed
 						, const FFractalParams& Params, const float Sharp);
+
 	static FVector2D DomainWarp(const FVector2D& Pos, const int32 Seed
 								, const FFractalParams& Base
 								, const FWarpParams& W);

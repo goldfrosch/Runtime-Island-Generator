@@ -29,7 +29,7 @@ void AIslandGenerator::GenerateTerrain()
 			TArray<int32> CalcTriangles;
 			// 실제 Mesh에 사용할 삼각형 폴리곤
 			TArray<int32> Triangles;
-			TArray<FVector2d> UV0s;
+			TArray<FVector2D> UV0s;
 			TArray<FVector> Normals;
 			TArray<FProcMeshTangent> Tangents;
 
@@ -70,23 +70,19 @@ void AIslandGenerator::CalculateTerrainData_Internal(TArray<FVector>& Vertices
 			const int32 YPos = CellSize * YIndex;
 
 			const float Height = FNoiseUtil::Height_Mountains(
-				FVector2D(XPos, YPos) * 0.006f, Seed, MountainBiomeFractal
-				, MountainBiomeWarp, FVector2D(1, 0));
+				FVector2D(XPos, YPos) / (VertexCount * FMath::Min(
+					100.f, XTileSize * YTileSize)), Seed, MountainBiomeFractal
+				, MountainBiomeWarp);
 
-			const FVector VertexPos = FVector(XPos, YPos, Height * MaxHeight);
+			const FVector VertexPos = FVector(XPos, YPos
+											, FMath::RoundToFloat(Height * 1000)
+											/ 1000 * MaxHeight);
 
 			Vertices.Add(VertexPos);
-
 			// UV 값 추가
 			UV0s.Add(FVector2d(XIndex, YIndex));
 		}
 	}
-
-	FGenerateUtil::DiamondSquare(Vertices, VertexCount, {
-									VertexCount, Seed
-									, FVector2D(XTileIndex, YTileIndex)
-									, CellSize
-								});
 }
 
 void AIslandGenerator::CalculateTriangle_Internal(TArray<int32>& CalcTriangles
