@@ -3,7 +3,8 @@
 #include "ProceduralMeshComponent/Public/KismetProceduralMeshLibrary.h"
 #include "ProceduralMeshComponent/Public/ProceduralMeshComponent.h"
 
-#include "Util/NoiseUtil.h"
+#include "Util/LandscapeUtil.h"
+// #include "Util/NoiseUtil.h"
 
 AIslandGenerator::AIslandGenerator()
 {
@@ -69,20 +70,18 @@ void AIslandGenerator::CalculateTerrainData_Internal(TArray<FVector>& Vertices
 			const int32 XPos = CellSize * XIndex;
 			const int32 YPos = CellSize * YIndex;
 
-			const float Height = FNoiseUtil::Height_Mountains(
-				FVector2D(XPos, YPos) / (VertexCount * FMath::Min(
-					100.f, XTileSize * YTileSize)), Seed, MountainBiomeFractal
-				, MountainBiomeWarp);
+			const float Height = FLandscapeUtil::GetHeight_Mountain(
+				FVector2D(XPos, YPos) / CellSize, VertexCount, Seed);
 
-			const FVector VertexPos = FVector(XPos, YPos
-											, FMath::RoundToFloat(Height * 1000)
-											/ 1000 * MaxHeight);
+			const FVector VertexPos = FVector(XPos, YPos, Height * MaxHeight);
 
 			Vertices.Add(VertexPos);
 			// UV 값 추가
 			UV0s.Add(FVector2d(XIndex, YIndex));
 		}
 	}
+
+	// FNoiseUtil::BlurNxN(Vertices, VertexCount + 2, 3);
 }
 
 void AIslandGenerator::CalculateTriangle_Internal(TArray<int32>& CalcTriangles
