@@ -9,6 +9,17 @@ float FLandscapeUtil::GetHeight_Mountain(const FVector2D& Pos
 	return FbmPerlinNoise(Pos / VertexCount, Seed, MountainPerlinNoiseParams);
 }
 
+uint8 FLandscapeUtil::GetBiomeData(const FVector2D& Pos, const int32 Seed
+									, const FBiomeParams& Params)
+{
+	if (Params.NoiseCount == 1)
+	{
+		return 1;
+	}
+
+	return VoronoiNoise(Pos, Seed, Params);
+}
+
 float FLandscapeUtil::FbmPerlinNoise(const FVector2D& Pos, const int32 Seed
 									, const FFbmNoiseParams& Params)
 {
@@ -43,3 +54,36 @@ float FLandscapeUtil::FbmPerlinNoise(const FVector2D& Pos, const int32 Seed
 	return Result;
 }
 
+uint8 FLandscapeUtil::VoronoiNoise(const FVector2D& Pos, const int32 Seed
+									, const FBiomeParams& Params)
+{
+	const int CellX = floor(Pos.X / Params.VertexCount);
+	const int CellY = floor(Pos.Y / Params.VertexCount);
+
+	float MinDist = 999999.0f;
+
+	// 주변 9개 셀만 확인 (자신+이웃)
+	for (int dy = -1; dy <= 1; ++dy)
+	{
+		for (int dx = -1; dx <= 1; ++dx)
+		{
+			int nx = CellX + dx;
+			int ny = CellY + dy;
+
+			// Seed 위치 (격자 중심 + 랜덤 오프셋)
+			FVector2D SeedPos = FVector2D(
+				nx + FHashUtil::Hash01_2D(FVector2D(nx, ny), Seed)
+				, ny + FHashUtil::Hash01_2D(FVector2D(nx + 1, ny + 1), Seed));
+
+			const float Distance = FVector2D::Distance(
+				Pos, SeedPos * Params.VertexCount);
+			if (Distance < MinDist)
+			{
+				MinDist = Distance;
+			}
+		}
+	}
+
+	// 0 ~ 1 정규화로 소숫점 자리 잡기
+	return FMath::RoundToInt(MinDist / Params.VertexCount * Params.NoiseCount);
+}

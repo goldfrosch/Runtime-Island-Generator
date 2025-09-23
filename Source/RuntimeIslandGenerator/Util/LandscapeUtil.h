@@ -18,6 +18,12 @@ struct FFbmNoiseParams
 	float DomainWarpStrength;
 };
 
+struct FBiomeParams
+{
+	uint8 NoiseCount = 1;
+	uint32 VertexCount;
+};
+
 constexpr FFbmNoiseParams PlainHillPerlinNoiseParams{
 	2.5f, 4, 0.8f, 0.55f, 2.0f, 0.0f, 0.0f
 };
@@ -33,8 +39,13 @@ public:
 									, const uint32 VertexCount
 									, const int32 Seed);
 
+	static uint8 GetBiomeData(const FVector2D& Pos, const int32 Seed
+							, const FBiomeParams& Params);
+
 private:
 	static float FbmPerlinNoise(const FVector2D& Pos, const int32 Seed
 								, const FFbmNoiseParams& Params);
 
+	static uint8 VoronoiNoise(const FVector2D& Pos, const int32 Seed
+							, const FBiomeParams& Params);
 };
