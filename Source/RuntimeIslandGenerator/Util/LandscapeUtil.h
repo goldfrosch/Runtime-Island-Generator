@@ -1,5 +1,13 @@
 ﻿#pragma once
 
+struct FLandscapeOptions
+{
+	bool IsTileInfinite = false;
+	uint32 VertexCount;
+	uint64 XTileVertexCount;
+	uint64 YTileVertexCount;
+};
+
 struct FFbmNoiseParams
 {
 	// 1에서 7을 권장함
@@ -35,9 +43,13 @@ constexpr FFbmNoiseParams MountainPerlinNoiseParams{
 class FLandscapeUtil
 {
 public:
-	static float GetHeight_Mountain(const FVector2D& Pos
-									, const uint32 VertexCount
-									, const int32 Seed);
+	static float GetHeight_Mountain(const FVector2D& Pos, const int32 Seed
+									, const FLandscapeOptions& Params);
+	static float GetHeight_PlainHill(const FVector2D& Pos, const int32 Seed
+									, const FLandscapeOptions& Params);
+
+	static float SquareGradient(const FVector2D& Pos
+								, const FLandscapeOptions& Params);
 
 	static uint8 GetBiomeData(const FVector2D& Pos, const int32 Seed
 							, const FBiomeParams& Params);

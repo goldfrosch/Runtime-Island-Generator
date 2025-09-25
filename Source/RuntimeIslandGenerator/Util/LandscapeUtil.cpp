@@ -2,11 +2,18 @@
 
 #include "HashUtil.h"
 
-float FLandscapeUtil::GetHeight_Mountain(const FVector2D& Pos
-										, const uint32 VertexCount
-										, const int32 Seed)
+float FLandscapeUtil::GetHeight_Mountain(const FVector2D& Pos, const int32 Seed
+										, const FLandscapeOptions& Params)
 {
-	return FbmPerlinNoise(Pos / VertexCount, Seed, MountainPerlinNoiseParams);
+	return FbmPerlinNoise(Pos / Params.VertexCount, Seed
+						, MountainPerlinNoiseParams);
+}
+
+float FLandscapeUtil::GetHeight_PlainHill(const FVector2D& Pos, const int32 Seed
+										, const FLandscapeOptions& Params)
+{
+	return FbmPerlinNoise(Pos / Params.VertexCount, Seed
+						, PlainHillPerlinNoiseParams);
 }
 
 uint8 FLandscapeUtil::GetBiomeData(const FVector2D& Pos, const int32 Seed
@@ -30,17 +37,23 @@ float FLandscapeUtil::FbmPerlinNoise(const FVector2D& Pos, const int32 Seed
 	float Amplitude = Params.Amplitude;
 	float Frequency = Params.Frequency;
 
-	const float Persistence = Params.Persistence + 0.1 * (
+	const float Persistence = Params.Persistence + 0.1f * (
 		FHashUtil::Hash01(Seed) - 0.5f);
 
 	// 도메인 워핑 적용
 	FVector2D InPos = Pos;
 	if (Params.DomainWarpStrength > KINDA_SMALL_NUMBER)
 	{
+		const float sfx = FHashUtil::Hash01(Seed * 1664525 + 1013904223);
+		const float sfy = FHashUtil::Hash01(Seed * 22695477 + 1);
+
+		const FVector2D SeedOffset = FVector2D(sfx - 0.5f, sfy - 0.5f);
+
 		const float WarpingX = FMath::PerlinNoise2D(
-			Pos * (Frequency * 0.8f) + FVector2D(Seed * 0.37f, Seed * 0.73f));
+			Pos * (Frequency * 0.8f) + SeedOffset);
 		const float WarpingY = FMath::PerlinNoise2D(
-			Pos * (Frequency * 0.8f) + FVector2D(Seed * 1.13f, Seed * 0.29f));
+			Pos * (Frequency * 0.8f) + SeedOffset);
+
 		InPos += FVector2D(WarpingX, WarpingY) * Params.DomainWarpStrength;
 	}
 
@@ -86,4 +99,25 @@ uint8 FLandscapeUtil::VoronoiNoise(const FVector2D& Pos, const int32 Seed
 
 	// 0 ~ 1 정규화로 소숫점 자리 잡기
 	return FMath::RoundToInt(MinDist / Params.VertexCount * Params.NoiseCount);
+}
+
+float FLandscapeUtil::SquareGradient(const FVector2D& Pos
+									, const FLandscapeOptions& Params)
+{
+	const FVector2D Center(Params.XTileVertexCount * 0.5f
+							, Params.YTileVertexCount * 0.5f);
+
+	const float X = FMath::Abs(Pos.X - Center.X);
+	const float Y = FMath::Abs(Pos.Y - Center.Y);
+
+	const float Dist = FMath::Max(X, Y);
+
+	const float MaxDist = FMath::Max(Params.XTileVertexCount
+									, Params.YTileVertexCount) * 0.5f;
+	const float DistRatio = Dist / MaxDist;
+
+	float Mask = 1.0f - DistRatio;
+	Mask = FMath::Clamp(Mask, 0.0f, 1.0f);
+
+	return Mask;
 }

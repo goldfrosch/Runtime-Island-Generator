@@ -4,7 +4,6 @@
 #include "ProceduralMeshComponent/Public/ProceduralMeshComponent.h"
 
 #include "Util/LandscapeUtil.h"
-// #include "Util/NoiseUtil.h"
 
 AIslandGenerator::AIslandGenerator()
 {
@@ -58,30 +57,36 @@ void AIslandGenerator::CalculateTerrainData_Internal(TArray<FVector>& Vertices
 	, TArray<FVector2d>& UV0s, const uint16 XTileIndex
 	, const uint16 YTileIndex) const
 {
+	const uint64 XTileVertexCount = VertexCount * XTileSize;
+	const uint64 YTileVertexCount = VertexCount * YTileSize;
+
+	const FLandscapeOptions LandscapeOptions = {
+		false, VertexCount, XTileVertexCount, YTileVertexCount
+	};
+
 	for (int32 y = -1; y <= VertexCount; y++)
 	{
 		for (int32 x = -1; x <= VertexCount; x++)
 		{
 			// 타일 섹션 위치에 따른 X, Y Index 값
-			const int32 XIndex = (VertexCount - 1) * XTileIndex + x;
-			const int32 YIndex = (VertexCount - 1) * YTileIndex + y;
+			const int64 XIndex = (VertexCount - 1) * XTileIndex + x;
+			const int64 YIndex = (VertexCount - 1) * YTileIndex + y;
 
 			// Vertices에 넣을 포지션 정보 먼저 구함
-			const int32 XPos = CellSize * XIndex;
-			const int32 YPos = CellSize * YIndex;
+
+			const FVector2D Pos = FVector2D(XIndex, YIndex);
 
 			const float Height = FLandscapeUtil::GetHeight_Mountain(
-				FVector2D(XPos, YPos) / CellSize, VertexCount, Seed);
+				Pos, Seed, LandscapeOptions) * FLandscapeUtil::SquareGradient(
+				Pos, LandscapeOptions);
 
-			const FVector VertexPos = FVector(XPos, YPos, Height * MaxHeight);
+			const FVector VertexPos = FVector(Pos.X, Pos.Y, Height * MaxHeight);
 
 			Vertices.Add(VertexPos);
 			// UV 값 추가
 			UV0s.Add(FVector2d(XIndex, YIndex));
 		}
 	}
-
-	// FNoiseUtil::BlurNxN(Vertices, VertexCount + 2, 3);
 }
 
 void AIslandGenerator::CalculateTriangle_Internal(TArray<int32>& CalcTriangles
@@ -154,6 +159,7 @@ void AIslandGenerator::FilterTerrainData_Internal(TArray<FVector>& Vertices
 
 	// 순회 하면서 기존 값들 전체 제거 처리
 	uint32 Index = 0;
+
 	for (int32 y = -1; y <= VertexCount; y++)
 	{
 		for (int32 x = -1; x <= VertexCount; x++)
