@@ -45,9 +45,6 @@ void AIslandGenerator::InitializeChunks()
 			});
 		}
 	}
-
-	UE_LOG(LogTemp, Display, TEXT("지형 생성 완료: %s")
-			, *FDateTime::Now().ToString());
 }
 
 void AIslandGenerator::LoadChunk(const uint16 X, const uint16 Y)
@@ -123,11 +120,12 @@ void AIslandGenerator::CalculateTerrainData_Internal(TArray<FVector>& Vertices
 
 			// Vertices에 넣을 포지션 정보 먼저 구함
 
-			const FVector2D Pos = FVector2D(XIndex, YIndex);
+			const FVector2D Pos = FVector2D(XIndex, YIndex) * CellSize;
 
 			const float Height = FLandscapeUtil::GetHeight_Mountain(
-				Pos, Seed, LandscapeOptions) * FLandscapeUtil::SquareGradient(
-				Pos, LandscapeOptions);
+				Pos / CellSize, Seed
+				, LandscapeOptions) * FLandscapeUtil::SquareGradient(
+				Pos / CellSize, LandscapeOptions);
 
 			const FVector VertexPos = FVector(Pos.X, Pos.Y, Height * MaxHeight);
 
