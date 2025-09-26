@@ -4,6 +4,11 @@
 #include "GameFramework/Actor.h"
 #include "IslandGenerator.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnIslandInitializeSuccess);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnIslandChunkLoadedSuccess
+											, const uint16, X, const uint16, Y);
+
 class UProceduralMeshComponent;
 struct FProcMeshTangent;
 
@@ -16,7 +21,12 @@ public:
 	AIslandGenerator();
 
 	UFUNCTION(CallInEditor)
-	void GenerateTerrain();
+	void InitializeChunks();
+
+	void LoadChunk(const uint16 X, const uint16 Y);
+
+	FOnIslandInitializeSuccess OnIslandInitializeSuccess;
+	FOnIslandChunkLoadedSuccess OnIslandChunkLoadedSuccess;
 
 protected:
 	UPROPERTY()
@@ -68,4 +78,8 @@ protected:
 									, TArray<FVector2d>& UV0s
 									, TArray<FVector>& Normals
 									, TArray<FProcMeshTangent>& Tangents) const;
+
+	TArray<bool> InitializedChunkInfo;
+
+	bool IsInitialized;
 };

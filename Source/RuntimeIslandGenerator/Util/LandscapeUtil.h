@@ -51,13 +51,7 @@ public:
 	static float SquareGradient(const FVector2D& Pos
 								, const FLandscapeOptions& Params);
 
-	static uint8 GetBiomeData(const FVector2D& Pos, const int32 Seed
-							, const FBiomeParams& Params);
-
 private:
 	static float FbmPerlinNoise(const FVector2D& Pos, const int32 Seed
 								, const FFbmNoiseParams& Params);
-
-	static uint8 VoronoiNoise(const FVector2D& Pos, const int32 Seed
-							, const FBiomeParams& Params);
 };

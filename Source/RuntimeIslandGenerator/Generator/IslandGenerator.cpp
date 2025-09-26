@@ -15,42 +15,91 @@ AIslandGenerator::AIslandGenerator()
 	TerrainMesh->SetupAttachment(GetRootComponent());
 }
 
-void AIslandGenerator::GenerateTerrain()
+void AIslandGenerator::InitializeChunks()
 {
+	InitializedChunkInfo.Empty();
+	InitializedChunkInfo.SetNum(XTileSize * YTileSize);
+
+	IsInitialized = false;
+
 	TerrainMesh->ClearAllMeshSections();
 	TerrainMesh->ClearCollisionConvexMeshes();
 
-	for (int Y = 0; Y < YTileSize; Y++)
+	TWeakObjectPtr WeakThis = this;
+
+	for (uint16 Y = 0; Y < YTileSize; Y++)
 	{
-		for (int X = 0; X < XTileSize; X++)
+		for (uint16 X = 0; X < XTileSize; X++)
 		{
-			TArray<FVector> Vertices;
-			// Normal과 Tangents 계산용 삼각형 폴리곤
-			TArray<int32> CalcTriangles;
-			// 실제 Mesh에 사용할 삼각형 폴리곤
-			TArray<int32> Triangles;
-			TArray<FVector2D> UV0s;
-			TArray<FVector> Normals;
-			TArray<FProcMeshTangent> Tangents;
+			const uint16 CurrentX = X;
+			const uint16 CurrentY = Y;
 
-			CalculateTerrainData_Internal(Vertices, UV0s, X, Y);
-			CalculateTriangle_Internal(CalcTriangles, Triangles);
+			Async(EAsyncExecution::ThreadPool, [WeakThis, CurrentX, CurrentY]()
+			{
+				if (!WeakThis.IsValid())
+				{
+					return;
+				}
 
-			UKismetProceduralMeshLibrary::CalculateTangentsForMesh(
-				Vertices, CalcTriangles, UV0s, Normals, Tangents);
-
-			FilterTerrainData_Internal(Vertices, UV0s, Normals, Tangents);
-
-			// Create Mesh Section 쪽만 비동기로 처리해도 됨.
-			const uint16 SectionIndex = Y * XTileSize + X;
-			TerrainMesh->CreateMeshSection(SectionIndex, Vertices, Triangles
-											, Normals, UV0s, TArray<FColor>()
-											, Tangents, true);
+				WeakThis->LoadChunk(CurrentX, CurrentY);
+			});
 		}
 	}
 
 	UE_LOG(LogTemp, Display, TEXT("지형 생성 완료: %s")
 			, *FDateTime::Now().ToString());
+}
+
+void AIslandGenerator::LoadChunk(const uint16 X, const uint16 Y)
+{
+	TArray<FVector> Vertices;
+	// Normal과 Tangents 계산용 삼각형 폴리곤
+	TArray<int32> CalcTriangles;
+	// 실제 Mesh에 사용할 삼각형 폴리곤
+	TArray<int32> Triangles;
+	TArray<FVector2D> UV0s;
+	TArray<FVector> Normals;
+	TArray<FProcMeshTangent> Tangents;
+
+	CalculateTerrainData_Internal(Vertices, UV0s, X, Y);
+	CalculateTriangle_Internal(CalcTriangles, Triangles);
+
+	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(
+		Vertices, CalcTriangles, UV0s, Normals, Tangents);
+
+	FilterTerrainData_Internal(Vertices, UV0s, Normals, Tangents);
+
+	TWeakObjectPtr WeakThis = this;
+	AsyncTask(ENamedThreads::GameThread
+			, [WeakThis, X, Y, Vertices, Triangles, UV0s,Normals, Tangents]()
+			{
+				if (!WeakThis.IsValid())
+				{
+					return;
+				}
+				AIslandGenerator* Generator = WeakThis.Get();
+
+				const uint16 SectionIndex = Y * Generator->XTileSize + X;
+				Generator->TerrainMesh->CreateMeshSection(
+					SectionIndex, Vertices, Triangles, Normals, UV0s
+					, TArray<FColor>(), Tangents, true);
+
+				// 현재 초기화 과정인 경우
+				if (!Generator->IsInitialized)
+				{
+					Generator->InitializedChunkInfo[SectionIndex] = true;
+
+					if (Generator->InitializedChunkInfo.Contains(false))
+					{
+						return;
+					}
+					Generator->OnIslandInitializeSuccess.Broadcast();
+				}
+				else
+				{
+					Generator->OnIslandChunkLoadedSuccess.Broadcast(X, Y);
+				}
+			});
 }
 
 void AIslandGenerator::CalculateTerrainData_Internal(TArray<FVector>& Vertices
