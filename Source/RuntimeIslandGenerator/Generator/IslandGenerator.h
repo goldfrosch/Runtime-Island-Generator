@@ -79,7 +79,10 @@ protected:
 									, TArray<FVector>& Normals
 									, TArray<FProcMeshTangent>& Tangents) const;
 
+private:
 	TArray<bool> InitializedChunkInfo;
 
-	bool IsInitialized;
+	bool IsInitialized = false;
+
+	bool IsLoading = false;
 };

@@ -4,6 +4,7 @@
 #include "ProceduralMeshComponent/Public/ProceduralMeshComponent.h"
 
 #include "Util/LandscapeUtil.h"
+#include "Util/NoiseData.h"
 
 AIslandGenerator::AIslandGenerator()
 {
@@ -17,10 +18,16 @@ AIslandGenerator::AIslandGenerator()
 
 void AIslandGenerator::InitializeChunks()
 {
+	if (IsLoading)
+	{
+		return;
+	}
+
 	InitializedChunkInfo.Empty();
 	InitializedChunkInfo.SetNum(XTileSize * YTileSize);
 
 	IsInitialized = false;
+	IsLoading = true;
 
 	TerrainMesh->ClearAllMeshSections();
 	TerrainMesh->ClearCollisionConvexMeshes();
@@ -90,10 +97,13 @@ void AIslandGenerator::LoadChunk(const uint16 X, const uint16 Y)
 					{
 						return;
 					}
+
+					Generator->IsLoading = false;
 					Generator->OnIslandInitializeSuccess.Broadcast();
 				}
 				else
 				{
+					Generator->IsLoading = false;
 					Generator->OnIslandChunkLoadedSuccess.Broadcast(X, Y);
 				}
 			});
