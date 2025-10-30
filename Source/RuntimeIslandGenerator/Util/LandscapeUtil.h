@@ -33,7 +33,7 @@ public:
 								, const FLandscapeOptions& Params);
 
 	// 좌표 -> 바이옴 (가장 단순)
-	static EBiome GetBiomeAt_Voronoi(const FVector2D& WorldXY
+	static EBiome GetBiomeAt_Voronoi(const FVector2D& Pos
 									, const FVoronoiBiomeParams& Params);
 
 private:

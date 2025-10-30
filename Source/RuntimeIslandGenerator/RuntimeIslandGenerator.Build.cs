@@ -19,7 +19,8 @@ public class RuntimeIslandGenerator : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new[]
 			{
-				"Core"
+				"Core",
+				"ProceduralMeshComponent"
 			}
 		);
 
@@ -28,7 +29,7 @@ public class RuntimeIslandGenerator : ModuleRules
 			new[]
 			{
 				"CoreUObject", "Engine", "Slate", "SlateCore",
-				"ProceduralMeshComponent"
+				"EditorStyle", "UnrealEd", "MainFrame"
 			}
 		);
 	}

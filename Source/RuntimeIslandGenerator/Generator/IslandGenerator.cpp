@@ -4,7 +4,6 @@
 #include "ProceduralMeshComponent/Public/ProceduralMeshComponent.h"
 
 #include "Util/LandscapeUtil.h"
-#include "Util/NoiseData.h"
 
 AIslandGenerator::AIslandGenerator()
 {
@@ -132,12 +131,15 @@ void AIslandGenerator::CalculateTerrainData_Internal(TArray<FVector>& Vertices
 
 			const FVector2D Pos = FVector2D(XIndex, YIndex) * CellSize;
 
-			const float Height = FLandscapeUtil::GetHeight_Mountain(
-				Pos / CellSize, Seed
-				, LandscapeOptions) * FLandscapeUtil::SquareGradient(
-				Pos / CellSize, LandscapeOptions);
+			const float Height = FMath::Lerp(MinHeight
+											, FLandscapeUtil::GetHeight_Mountain(
+												Pos / CellSize, Seed
+												, LandscapeOptions) * MaxHeight
+											, FLandscapeUtil::SquareGradient(
+												Pos / CellSize
+												, LandscapeOptions));
 
-			const FVector VertexPos = FVector(Pos.X, Pos.Y, Height * MaxHeight);
+			const FVector VertexPos = FVector(Pos.X, Pos.Y, Height);
 
 			Vertices.Add(VertexPos);
 			// UV 값 추가

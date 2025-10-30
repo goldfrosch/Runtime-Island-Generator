@@ -18,7 +18,6 @@ struct FVoronoiBiomeRule
 // 바이옴 파라미터 (필요 최소치만)
 struct FVoronoiBiomeParams
 {
-	int32 CellSize = 1024; // 셀 하나의 월드 길이(정수 단위)
 	float JitterAmp = 0.45f; // 셀 내부 특성점 흔들기(0~0.5 권장)
 	int32 Seed = 1337;
 

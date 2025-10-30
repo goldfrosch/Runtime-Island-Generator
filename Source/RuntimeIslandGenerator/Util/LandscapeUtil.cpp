@@ -182,11 +182,10 @@ EBiome FLandscapeUtil::PickBiomeFromHash(const uint32 CellHash
 	return (DefaultDist)[0].Biome; // fallback
 }
 
-// ---- 좌표 -> 바이옴 ----
-EBiome FLandscapeUtil::GetBiomeAt_Voronoi(const FVector2D& WorldXY
+EBiome FLandscapeUtil::GetBiomeAt_Voronoi(const FVector2D& Pos
 										, const FVoronoiBiomeParams& Params)
 {
-	const FVoronoiSample VoronoiBiomeResult = SampleVoronoi(WorldXY, Params);
+	const FVoronoiSample VoronoiBiomeResult = SampleVoronoi(Pos, Params);
 	const uint32 CellHash = FHashUtil::Hash32_2D(
 		VoronoiBiomeResult.NearestCell, Params.Seed);
 
