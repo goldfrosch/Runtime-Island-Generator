@@ -29,6 +29,10 @@ public:
 	static float GetHeight_PlainHill(const FVector2D& Pos, const int32 Seed
 									, const FLandscapeOptions& Params);
 
+	static float RoundGradient(const FVector2D& Pos
+								, const FLandscapeOptions& Params
+								, const int64 Seed
+								, const float RoundPercent = 0.1);
 	static float SquareGradient(const FVector2D& Pos
 								, const FLandscapeOptions& Params);
 

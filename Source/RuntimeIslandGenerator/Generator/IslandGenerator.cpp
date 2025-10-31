@@ -2,6 +2,7 @@
 
 #include "ProceduralMeshComponent/Public/KismetProceduralMeshLibrary.h"
 #include "ProceduralMeshComponent/Public/ProceduralMeshComponent.h"
+#include "Util/HashUtil.h"
 
 #include "Util/LandscapeUtil.h"
 
@@ -13,6 +14,11 @@ AIslandGenerator::AIslandGenerator()
 	TerrainMesh = CreateDefaultSubobject<UProceduralMeshComponent>(
 		"Terrain Mesh");
 	TerrainMesh->SetupAttachment(GetRootComponent());
+}
+
+void AIslandGenerator::RandomSeed()
+{
+	Seed = FHashUtil::SplitMix(Seed);
 }
 
 void AIslandGenerator::InitializeChunks()
@@ -135,9 +141,9 @@ void AIslandGenerator::CalculateTerrainData_Internal(TArray<FVector>& Vertices
 											, FLandscapeUtil::GetHeight_Mountain(
 												Pos / CellSize, Seed
 												, LandscapeOptions) * MaxHeight
-											, FLandscapeUtil::SquareGradient(
-												Pos / CellSize
-												, LandscapeOptions));
+											, FLandscapeUtil::RoundGradient(
+												Pos / CellSize, LandscapeOptions
+												, Seed));
 
 			const FVector VertexPos = FVector(Pos.X, Pos.Y, Height);
 

@@ -20,28 +20,28 @@ float FLandscapeUtil::FbmPerlinNoise(const FVector2D& Pos, const int32 Seed
 									, const FFbmNoiseParams& Params)
 {
 	float Result = 0.f;
+	const float RandomValue = FHashUtil::Hash01(Seed) - 0.5f;
 
 	// 근사치 랜덤 조절
-	// TODO: 근사치를 위한 값도 추후 Params로 넣기
-	float Amplitude = Params.Amplitude;
-	float Frequency = Params.Frequency;
+	float Amplitude = Params.Amplitude * (1 + RandomValue);
+	float Frequency = Params.Frequency * (1 + RandomValue);
 
 	const float Persistence = Params.Persistence + 0.1f * (
 		FHashUtil::Hash01(Seed) - 0.5f);
+
+	const float Fx = FHashUtil::Hash01(Seed * 1664525 + 1013904223);
+	const float Fy = FHashUtil::Hash01(Seed * 22695477 + 1);
+
+	const FVector2D SeedOffset = FVector2D(Fx, Fy);
 
 	// 도메인 워핑 적용
 	FVector2D InPos = Pos;
 	if (Params.DomainWarpStrength > KINDA_SMALL_NUMBER)
 	{
-		const float sfx = FHashUtil::Hash01(Seed * 1664525 + 1013904223);
-		const float sfy = FHashUtil::Hash01(Seed * 22695477 + 1);
-
-		const FVector2D SeedOffset = FVector2D(sfx - 0.5f, sfy - 0.5f);
-
 		const float WarpingX = FMath::PerlinNoise2D(
-			Pos * (Frequency * 0.8f) + SeedOffset);
+			Pos * Frequency + SeedOffset);
 		const float WarpingY = FMath::PerlinNoise2D(
-			Pos * (Frequency * 0.8f) + SeedOffset);
+			Pos * Frequency + SeedOffset);
 
 		InPos += FVector2D(WarpingX, WarpingY) * Params.DomainWarpStrength;
 	}
@@ -54,6 +54,22 @@ float FLandscapeUtil::FbmPerlinNoise(const FVector2D& Pos, const int32 Seed
 	}
 
 	return Result;
+}
+
+float FLandscapeUtil::RoundGradient(const FVector2D& Pos
+									, const FLandscapeOptions& Params
+									, const int64 Seed
+									, const float RoundPercent)
+{
+	const FVector2D Center(Params.XTileVertexCount * 0.5f
+							, Params.YTileVertexCount * 0.5f);
+
+	const float DefaultRadius = FMath::Min(Params.XTileVertexCount
+											, Params.YTileVertexCount) * 0.5;
+
+	const float Percent = 1 - FVector2D::Distance(Center, Pos) / DefaultRadius;
+
+	return FMath::Clamp(FMath::Max(Percent, 0.1), 0, 1);
 }
 
 float FLandscapeUtil::SquareGradient(const FVector2D& Pos

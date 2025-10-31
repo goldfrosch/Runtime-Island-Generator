@@ -23,6 +23,9 @@ public:
 	UFUNCTION(CallInEditor)
 	void InitializeChunks();
 
+	UFUNCTION(CallInEditor)
+	void RandomSeed();
+
 	void LoadChunk(const uint16 X, const uint16 Y);
 
 	FOnIslandInitializeSuccess OnIslandInitializeSuccess;
