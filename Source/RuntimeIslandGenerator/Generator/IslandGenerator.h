@@ -63,7 +63,7 @@ protected:
 	int32 CellSize = 8;
 
 	UPROPERTY(EditInstanceOnly, Category = "Options|Terrain|Base"
-		, meta = (AllowPrivateAccess = true, ClampMin = "0"))
+		, meta = (AllowPrivateAccess = true))
 	int32 MinHeight = -128;
 
 	void CalculateTerrainData_Internal(TArray<FVector>& Vertices
